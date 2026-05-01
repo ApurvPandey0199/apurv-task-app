@@ -1,0 +1,71 @@
+🚀 RAILWAY DEPLOYMENT INSTRUCTIONS 🚀
+
+**MANDATORY DEPLOYMENT REQUIREMENT:**
+App must be live and fully functional for selection
+
+📋 **STEPS TO DEPLOY ON RAILWAY:**
+
+1️⃣ **Create Railway Account:**
+   - Browser में जाएं: https://railway.app
+   - Sign up करें (GitHub या Email से)
+   - Login करें
+
+2️⃣ **Create New Project:**
+   - Dashboard पर "New Project" button पर click करें
+   - "Deploy from GitHub repo" select करें
+   - अपना GitHub repository connect करें:
+     https://github.com/ApurvPandey0199/apurv-task-app
+
+3️⃣ **Configure Deployment:**
+   - Repository select करें: apurv-task-app
+   - Branch: master
+   - Build Command: खाली छोड़ें
+   - Start Command: npx serve -s . -l 3000
+   - Port: 3000
+
+4️⃣ **Environment Variables:**
+   - कोई environment variables नहीं चाहिए (static HTML app है)
+
+5️⃣ **Deploy:**
+   - "Deploy" button पर click करें
+   - Railway automatically build करेगा
+   - 2-3 मिनट में live हो जाएगा
+
+6️⃣ **Get Live URL:**
+   - Deploy complete होने पर Railway आपको URL देगा
+   - Format: https://your-project-name.railway.app
+
+📁 **Files Ready:**
+- railway-deploy.html (Main app file)
+- railway.json (Configuration file)
+- index.html (Alternative file)
+
+✅ **App Features:**
+- Login/Signup System
+- Dashboard with Tasks & Projects
+- Sample Data Included
+- Responsive Design
+- Railway Compatible
+
+🎯 **Login Credentials:**
+- Email: demo@example.com
+- Password: anything
+
+🔥 **ALTERNATIVE:**
+अगर Railway न काम करे तो:
+- Vercel: https://vercel.com
+- Netlify: https://netlify.com
+- CodePen: https://codepen.io
+
+⚠️ **IMPORTANT:**
+- Railway automatically static files serve करता है
+- railway.json file बनाई गई है proper configuration के लिए
+- Port 3000 पर serve होगा
+
+📞 **SUPPORT:**
+अगर कोई issue आए तो:
+1. Railway documentation check करें
+2. Build logs check करें
+3. Environment variables verify करें
+
+अभी Railway पर deploy करें और mandatory requirement पूरी करें!
