@@ -60,10 +60,10 @@
         const TaskContext = createContext();
         const TaskProvider = ({ children }) => {
             const [tasks, setTasks] = useState([
-                { id: 1, title: 'Complete Project Setup', description: 'Set up the complete React application with all features', status: 'In Progress', priority: 'High' },
+                { id: 1, title: 'Complete Project Setup', description: 'Set up complete React application with all features', status: 'In Progress', priority: 'High' },
                 { id: 2, title: 'Design Dashboard UI', description: 'Create a beautiful and responsive dashboard interface', status: 'Todo', priority: 'Medium' },
                 { id: 3, title: 'Add Authentication', description: 'Implement user login and signup functionality', status: 'Completed', priority: 'High' },
-                { id: 4, title: 'Deploy Application', description: 'Deploy the app to get a live URL', status: 'Todo', priority: 'Low' }
+                { id: 4, title: 'Deploy Application', description: 'Deploy app to get a live URL', status: 'Todo', priority: 'Low' }
             ]);
 
             const addTask = async (task) => {
