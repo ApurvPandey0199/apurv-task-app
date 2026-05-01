@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apurv Task App</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { BrowserRouter, Routes, Route, Navigate, Link } = ReactRouterDOM;
+        const { useState, useEffect, useContext, createContext } = React;
+
+        // Supabase Setup - Replace with your actual credentials
+        const supabaseUrl = 'https://your-project.supabase.co';
+        const supabaseAnonKey = 'your-anon-key';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        // Auth Context
+        const AuthContext = createContext();
+        const AuthProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const checkSession = async () => {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        setUser({ id: session.user.id, name: 'User', email: session.user.email, role: 'Admin' });
+                    }
+                    setLoading(false);
+                };
+                checkSession();
+            }, []);
+
+            const login = async (email, password) => {
+                // Mock login for demo
+                setUser({ id: '1', name: 'Demo User', email, role: 'Admin' });
+                return true;
+            };
+
+            const signup = async (name, email, password) => {
+                // Mock signup for demo
+                setUser({ id: '1', name, email, role: 'Admin' });
+                return true;
+            };
+
+            const logout = async () => {
+                await supabase.auth.signOut();
+                setUser(null);
+            };
+
+            return (
+                <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        };
+        const useAuth = () => useContext(AuthContext);
+
+        // Task Context
+        const TaskContext = createContext();
+        const TaskProvider = ({ children }) => {
+            const [tasks, setTasks] = useState([
+                { id: 1, title: 'Sample Task 1', description: 'This is a demo task', status: 'Todo', priority: 'High' },
+                { id: 2, title: 'Sample Task 2', description: 'Another demo task', status: 'In Progress', priority: 'Medium' }
+            ]);
+
+            const addTask = async (task) => {
+                const newTask = { ...task, id: Date.now() };
+                setTasks([...tasks, newTask]);
+            };
+
+            return (
+                <TaskContext.Provider value={{ tasks, addTask }}>
+                    {children}
+                </TaskContext.Provider>
+            );
+        };
+
+        // Project Context
+        const ProjectContext = createContext();
+        const ProjectProvider = ({ children }) => {
+            const [projects, setProjects] = useState([
+                { id: 1, name: 'Demo Project', description: 'Sample project' }
+            ]);
+
+            return (
+                <ProjectContext.Provider value={{ projects }}>
+                    {children}
+                </ProjectContext.Provider>
+            );
+        };
+
+        // Components
+        const Login = () => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+            const { login } = useAuth();
+            const navigate = ReactRouterDOM.useNavigate();
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const success = await login(email, password);
+                setLoading(false);
+                if (success) {
+                    navigate('/');
+                } else {
+                    setError('Invalid credentials');
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                    <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+                        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Login</h2>
+                        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+                                disabled={loading}
+                            >
+                                {loading ? 'Logging in...' : 'Login'}
+                            </button>
+                        </form>
+                        <p className="text-center mt-4 text-gray-600">
+                            Don't have an account?{' '}
+                            <Link to="/signup" className="text-blue-600 hover:underline">Sign up</Link>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const Signup = () => {
+            const [name, setName] = useState('');
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+            const { signup } = useAuth();
+            const navigate = ReactRouterDOM.useNavigate();
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const success = await signup(name, email, password);
+                setLoading(false);
+                if (success) {
+                    navigate('/');
+                } else {
+                    setError('Error creating account');
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-100">
+                    <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+                        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Sign Up</h2>
+                        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 disabled:opacity-50"
+                                disabled={loading}
+                            >
+                                {loading ? 'Signing up...' : 'Sign Up'}
+                            </button>
+                        </form>
+                        <p className="text-center mt-4 text-gray-600">
+                            Already have an account?{' '}
+                            <Link to="/login" className="text-green-600 hover:underline">Login</Link>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const ProtectedRoute = ({ children }) => {
+            const { user, loading } = useAuth();
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100">
+                        <div className="text-2xl font-semibold text-gray-700">Loading...</div>
+                    </div>
+                );
+            }
+
+            if (!user) {
+                return <Navigate to="/login" replace />;
+            }
+
+            return children;
+        };
+
+        const Dashboard = () => {
+            const { user, logout } = useAuth();
+            const navigate = ReactRouterDOM.useNavigate();
+            const [activeTab, setActiveTab] = useState('tasks');
+            const { tasks } = useContext(TaskContext);
+            const { projects } = useContext(ProjectContext);
+
+            const handleLogout = async () => {
+                await logout();
+                navigate('/login');
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex justify-between items-center mb-8">
+                            <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
+                            <div className="flex items-center gap-4">
+                                <span className="text-gray-700">
+                                    Welcome, {user?.name}! 
+                                    {user?.role === 'Admin' && <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-1 rounded-full">Admin</span>}
+                                </span>
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-200"
+                                >
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={() => setActiveTab('tasks')}
+                                className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${activeTab === 'tasks' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                            >
+                                Tasks
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('projects')}
+                                className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${activeTab === 'projects' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                            >
+                                Projects
+                            </button>
+                        </div>
+
+                        {activeTab === 'tasks' && (
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h2 className="text-2xl font-bold mb-4">Tasks</h2>
+                                <div className="space-y-4">
+                                    {tasks.map(task => (
+                                        <div key={task.id} className="border p-4 rounded-lg">
+                                            <h3 className="font-bold">{task.title}</h3>
+                                            <p className="text-gray-600">{task.description}</p>
+                                            <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+                                                {task.status}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'projects' && (
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h2 className="text-2xl font-bold mb-4">Projects</h2>
+                                <div className="space-y-4">
+                                    {projects.map(project => (
+                                        <div key={project.id} className="border p-4 rounded-lg">
+                                            <h3 className="font-bold">{project.name}</h3>
+                                            <p className="text-gray-600">{project.description}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // App Component
+        const App = () => {
+            return (
+                <AuthProvider>
+                    <TaskProvider>
+                        <ProjectProvider>
+                            <BrowserRouter>
+                                <Routes>
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/signup" element={<Signup />} />
+                                    <Route 
+                                        path="/" 
+                                        element={
+                                            <ProtectedRoute>
+                                                <Dashboard />
+                                            </ProtectedRoute>
+                                        } 
+                                    />
+                                </Routes>
+                            </BrowserRouter>
+                        </ProjectProvider>
+                    </TaskProvider>
+                </AuthProvider>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

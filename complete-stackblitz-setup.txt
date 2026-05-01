@@ -1,0 +1,60 @@
+STACKBLITZ COMPLETE SETUP - INSTANT LIVE URL:
+
+1. Open https://stackblitz.com
+2. Click "New Project" → "React" 
+3. Name: "apurp-task-app"
+4. Click "Create Project"
+
+5. Replace package.json with stackblitz-package.json content
+
+6. In terminal, run:
+npm install react-router-dom @supabase/supabase-js
+
+7. Create .env file:
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+8. Replace src/App.jsx with:
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { TaskProvider } from './contexts/TaskContext';
+import { ProjectProvider } from './contexts/ProjectContext';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+
+function App() {
+  return (
+    <AuthProvider>
+      <TaskProvider>
+        <ProjectProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </Router>
+        </ProjectProvider>
+      </TaskProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;
+
+9. Create all other files (I provided all code above)
+
+10. INSTANT LIVE URL: 
+StackBlitz automatically gives you live URL like:
+https://apurp-task-app.stackblitz.io
+
+NO BUILD REQUIRED - INSTANT LIVE URL!
